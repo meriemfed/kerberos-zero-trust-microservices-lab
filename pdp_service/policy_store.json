@@ -1,0 +1,161 @@
+{
+  "PolicyDocument": {
+    "Version": "2026-04",
+    "Algorithm": "deny-overrides",
+    "Statements": [
+      {
+        "Sid": "EnforceDepartmentIsolation",
+        "Description": "Users can only access resources owned by their own department.",
+        "Effect": "Deny",
+        "Target": {
+          "Services": [
+            "*"
+          ],
+          "Actions": [
+            "*"
+          ]
+        },
+        "Conditions": [
+          {
+            "Field": "user.department",
+            "Operator": "neq_field",
+            "Value": "resource.department"
+          }
+        ]
+      },
+      {
+        "Sid": "DenyExternalSecretAccess",
+        "Description": "Deny access to secret resources from external locations.",
+        "Effect": "Deny",
+        "Target": {
+          "Services": [
+            "*"
+          ],
+          "Actions": [
+            "*"
+          ]
+        },
+        "Conditions": [
+          {
+            "Field": "resource.classification",
+            "Operator": "eq",
+            "Value": "secret"
+          },
+          {
+            "Field": "environment.location",
+            "Operator": "eq",
+            "Value": "external"
+          }
+        ]
+      },
+      {
+        "Sid": "RequireClearanceForSecret",
+        "Description": "Deny access if the resource is secret but the user lacks secret clearance.",
+        "Effect": "Deny",
+        "Target": {
+          "Services": [
+            "*"
+          ],
+          "Actions": [
+            "*"
+          ]
+        },
+        "Conditions": [
+          {
+            "Field": "resource.classification",
+            "Operator": "eq",
+            "Value": "secret"
+          },
+          {
+            "Field": "user.clearance",
+            "Operator": "neq",
+            "Value": "secret"
+          }
+        ]
+      },
+      {
+        "Sid": "RequireClearanceForConfidential",
+        "Description": "Deny access to confidential resources if the user only has public clearance.",
+        "Effect": "Deny",
+        "Target": {
+          "Services": [
+            "*"
+          ],
+          "Actions": [
+            "*"
+          ]
+        },
+        "Conditions": [
+          {
+            "Field": "resource.classification",
+            "Operator": "eq",
+            "Value": "confidential"
+          },
+          {
+            "Field": "user.clearance",
+            "Operator": "eq",
+            "Value": "public"
+          }
+        ]
+      },
+      {
+        "Sid": "EnforceWorkingHours",
+        "Description": "Deny all access outside working hours (08:00 - 18:00).",
+        "Effect": "Deny",
+        "Target": {
+          "Services": [
+            "*"
+          ],
+          "Actions": [
+            "*"
+          ]
+        },
+        "Conditions": [
+          {
+            "Field": "environment.time",
+            "Operator": "outside_range",
+            "Value": [
+              8,
+              18
+            ]
+          }
+        ]
+      },
+      {
+  "Sid": "DenyExternalSecretAccessByIP",
+  "Description": "Deny access to secret resources from outside the internal network range.",
+  "Effect": "Deny",
+  "Target": { "Services": ["*"], "Actions": ["*"] },
+  "Conditions": [
+    { "Field": "resource.classification", "Operator": "eq", "Value": "secret" },
+    { "Field": "environment.ip_address", "Operator": "not_cidr_match", "Value": "127.0.0.1/32" }
+  ]
+      }
+    ]
+  },
+  "RolePermissions": {
+    "employee": [
+      "GET"
+    ],
+    "manager": [
+      "GET",
+      "POST"
+
+    ],
+    "admin": [
+      "GET",
+      "POST",
+      "DELETE"
+    ]
+  },
+  "ToxicCombinations": [
+    {
+    "roles": ["finance-approver", "finance-auditor"],
+    "restricted_actions": ["POST", "DELETE"]
+    },
+    {
+    "roles": ["developer", "production-deployer"],
+    "restricted_actions": ["POST", "DELETE"]
+    }
+  ]
+}

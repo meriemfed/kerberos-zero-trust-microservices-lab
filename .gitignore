@@ -1,0 +1,38 @@
+# ==========================================
+# SecureCorp Zero-Trust .gitignore
+# ==========================================
+
+# 1. Python Caches & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 2. Virtual Environments
+venv/
+env/
+.venv/
+
+# 3. Environment Variables & Secrets
+# NEVER commit secret keys or environment variables
+.env
+.env.local
+
+# 4. Project Specific Logs
+*.log
+audit_bus.log
+
+# 5. IDEs and OS Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 6. Testing Caches
+.pytest_cache/
+htmlcov/
+.coverage
+
+# 7.project testing files
+users.json
+nonces.json
+build_auth.py

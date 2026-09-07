@@ -1,0 +1,102 @@
+services:
+  kdc:
+    build: .
+    command: python -m uvicorn kdc_service.main:app --host 0.0.0.0 --port 3001
+    ports:
+      - "3001:3001"
+    env_file: .env
+    environment:
+      - DOCKER_MODE=true
+    volumes:
+      - ./audit_bus.log:/app/audit_bus.log
+    networks:
+      - securecorp-net
+
+  pdp:
+    build: .
+    command: python -m uvicorn pdp_service.main:app --host 0.0.0.0 --port 3006
+    ports:
+      - "3006:3006"
+    env_file: .env
+    environment:
+      - DOCKER_MODE=true
+    volumes:
+      - ./audit_bus.log:/app/audit_bus.log
+    networks:
+      - securecorp-net
+
+  hr:
+    build: .
+    command: python -m uvicorn resource_services.hr_service.main:app --host 0.0.0.0 --port 3011
+    ports:
+      - "3011:3011"
+    env_file: .env
+    environment:
+      - DOCKER_MODE=true
+    volumes:
+      - ./audit_bus.log:/app/audit_bus.log
+    networks:
+      - securecorp-net
+
+  finance:
+    build: .
+    command: python -m uvicorn resource_services.finance_service.main:app --host 0.0.0.0 --port 3012
+    ports:
+      - "3012:3012"
+    env_file: .env
+    environment:
+      - DOCKER_MODE=true
+    volumes:
+      - ./audit_bus.log:/app/audit_bus.log
+    networks:
+      - securecorp-net
+
+  it:
+    build: .
+    command: python -m uvicorn resource_services.it_service.main:app --host 0.0.0.0 --port 3013
+    ports:
+      - "3013:3013"
+    env_file: .env
+    environment:
+      - DOCKER_MODE=true
+    volumes:
+      - ./audit_bus.log:/app/audit_bus.log
+    networks:
+      - securecorp-net
+
+  ops:
+    build: .
+    command: python -m uvicorn resource_services.ops_service.main:app --host 0.0.0.0 --port 3014
+    ports:
+      - "3014:3014"
+    env_file: .env
+    environment:
+      - DOCKER_MODE=true
+    volumes:
+      - ./audit_bus.log:/app/audit_bus.log
+    networks:
+      - securecorp-net
+
+  gateway:
+    build: .
+    command: python -m uvicorn api_gateway.main:app --host 0.0.0.0 --port 3000
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      - DOCKER_MODE=true
+    volumes:
+      - ./audit_bus.log:/app/audit_bus.log
+    depends_on:
+      - kdc
+      - pdp
+      - hr
+      - finance
+      - it
+      - ops
+    networks:
+      - securecorp-net
+
+networks:
+  securecorp-net:
+    driver: bridge
